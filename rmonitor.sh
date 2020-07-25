@@ -25,10 +25,12 @@ MEMCLOCKMIN=`cat /sys/class/hwmon/hwmon3/freq2_input`
 MEMCLOCKMIN=`echo "$MEMCLOCK / 1000000" | bc`
 MEMCLOCKMAX=`cat /sys/class/hwmon/hwmon3/freq2_input`
 MEMCLOCKMAX=`echo "$MEMCLOCK / 1000000" | bc`
-MEMFREE=`glxinfo -B | grep "Currently available dedicated video memory:" | awk -F: '{print $2}'`
-MEMTOTAL=`glxinfo -B | grep "Dedicated video memory:" | awk -F: '{print $2}'`
+MEMFREE=`glxinfo -B | grep "Currently available dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
+MEMTOTAL=`glxinfo -B | grep "Dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
 MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
 MEMTOTAL=`echo $MEMTOTAL | sed 's/ *$//g'`
+MEMUSEMAX=`echo "$MEMTOTAL - $MEMFREE"|bc`
+MEMUSEMIN=`echo "$MEMTOTAL - $MEMFREE"|bc`
 
 while :; do
 	TEMP=`sensors | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
@@ -38,8 +40,9 @@ while :; do
 	GPUCLOCK=`echo "$GPUCLOCK / 1000000" | bc`
 	MEMCLOCK=`cat /sys/class/hwmon/hwmon3/freq2_input`
 	MEMCLOCK=`echo "$MEMCLOCK / 1000000" | bc`
-	MEMFREE=`glxinfo -B | grep "Currently available dedicated video memory:" | awk -F: '{print $2}'`
+	MEMFREE=`glxinfo -B | grep "Currently available dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
 	MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
+	MEMUSE=`echo "$MEMTOTAL - $MEMFREE"|bc`
 	clear
 	POWER=`echo $POWER | sed 's/ *$//g'`
 	FAN=`echo $FAN | sed 's/ *$//g'`
@@ -83,24 +86,34 @@ while :; do
         then
                  MEMCLOCKMAX=$MEMCLOCK
         fi
+	if [ `echo "$MEMUSE < $MEMUSEMIN"|bc` -eq 1 ]
+        then
+                 MEMUSEMIN=$MEMUSE
+        fi
+        if [ `echo "$MEMUSE > $MEMUSEMAX"|bc` -eq 1 ]
+        then
+                 MEMUSEMAX=$MEMUSE
+        fi
 	echo $VGA
 	echo
 	echo -e "\e[97mGPU Clock : $GPUCLOCK \e[97mMHz"
-	echo -e "\e[97mGPU Min : \e[34m$GPUCLOCKMIN\e[97m MHz"
-        echo -e "\e[97mGPU Max : \e[93m$GPUCLOCKMAX\e[97m MHz"
+	echo -e "\e[97mGPU Clock Min : \e[34m$GPUCLOCKMIN\e[97m MHz"
+        echo -e "\e[97mGPU Clock Max : \e[93m$GPUCLOCKMAX\e[97m MHz"
 	echo -e "\e[97mMem Clock : $MEMCLOCK \e[97mMHz"
-	echo -e "\e[97mMem Min : \e[34m$MEMCLOCKMIN\e[97m MHz"
-        echo -e "\e[97mMem Max : \e[93m$MEMCLOCKMAX\e[97m MHz"
-	echo -e "\e[97mFree Mem : \e[92m$MEMFREE\e[90m/\e[1m\e[95m$MEMTOTAL\e[21m"
+	echo -e "\e[97mMem Clock Min : \e[34m$MEMCLOCKMIN\e[97m MHz"
+        echo -e "\e[97mMem Clock Max : \e[93m$MEMCLOCKMAX\e[97m MHz"
+	echo -e "\e[97mMem Use: \e[92m$MEMUSE\e[90m/\e[1m\e[95m$MEMTOTAL\e[97m MB"
+	echo -e "\e[97mMem Use Min : \e[34m$MEMUSEMIN\e[97m MB"
+        echo -e "\e[97mMem Use Max : \e[93m$MEMUSEMAX\e[97m MB"
 	echo -e "\e[97mTemp    : $TEMP°C"
-	echo -e "\e[97mMin Temp: \e[34m$MINTEMP\e[97m°C"
-        echo -e "\e[97mMax Temp: \e[93m$MAXTEMP\e[97m°C"
+	echo -e "\e[97mTemp Min : \e[34m$MINTEMP\e[97m°C"
+        echo -e "\e[97mTemp Max : \e[93m$MAXTEMP\e[97m°C"
 	echo -e "\e[97mFan    : $FAN RPM"
-	echo -e "\e[97mMin Fan: \e[34m$MINFAN \e[97mRPM"
-        echo -e "\e[97mMax Fan: \e[93m$MAXFAN \e[97mRPM"
+	echo -e "\e[97mFan Min : \e[34m$MINFAN \e[97mRPM"
+        echo -e "\e[97mFan Max: \e[93m$MAXFAN \e[97mRPM"
 	echo -e "\e[97mPower    : $POWER W"
-	echo -e "\e[97mMin Power: \e[34m$MINPOWER \e[97mW"
-        echo -e "\e[97mMax Power: \e[93m$MAXPOWER \e[97mW"
+	echo -e "\e[97mPower Min : \e[34m$MINPOWER \e[97mW"
+        echo -e "\e[97mPower Max : \e[93m$MAXPOWER \e[97mW"
 	echo -e "\e[97m"
 	sleep 2
 done

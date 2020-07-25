@@ -94,26 +94,26 @@ while :; do
         then
                  MEMUSEMAX=$MEMUSE
         fi
-	echo $VGA
+	echo -e "\e[91m$VGA"
 	echo
-	echo -e "\e[97mGPU Clock : $GPUCLOCK \e[97mMHz"
+	echo -e "\e[97mGPU Clock     : \e[92m$GPUCLOCK \e[97mMHz"
 	echo -e "\e[97mGPU Clock Min : \e[34m$GPUCLOCKMIN\e[97m MHz"
         echo -e "\e[97mGPU Clock Max : \e[93m$GPUCLOCKMAX\e[97m MHz"
-	echo -e "\e[97mMem Clock : $MEMCLOCK \e[97mMHz"
+	echo -e "\e[97mMem Clock     : \e[92m$MEMCLOCK \e[97mMHz"
 	echo -e "\e[97mMem Clock Min : \e[34m$MEMCLOCKMIN\e[97m MHz"
         echo -e "\e[97mMem Clock Max : \e[93m$MEMCLOCKMAX\e[97m MHz"
-	echo -e "\e[97mMem Use: \e[92m$MEMUSE\e[90m/\e[1m\e[95m$MEMTOTAL\e[97m MB"
-	echo -e "\e[97mMem Use Min : \e[34m$MEMUSEMIN\e[97m MB"
-        echo -e "\e[97mMem Use Max : \e[93m$MEMUSEMAX\e[97m MB"
-	echo -e "\e[97mTemp    : $TEMP°C"
-	echo -e "\e[97mTemp Min : \e[34m$MINTEMP\e[97m°C"
-        echo -e "\e[97mTemp Max : \e[93m$MAXTEMP\e[97m°C"
-	echo -e "\e[97mFan    : $FAN RPM"
-	echo -e "\e[97mFan Min : \e[34m$MINFAN \e[97mRPM"
-        echo -e "\e[97mFan Max: \e[93m$MAXFAN \e[97mRPM"
-	echo -e "\e[97mPower    : $POWER W"
-	echo -e "\e[97mPower Min : \e[34m$MINPOWER \e[97mW"
-        echo -e "\e[97mPower Max : \e[93m$MAXPOWER \e[97mW"
-	echo -e "\e[97m"
+	echo -e "\e[97mMem Use       : \e[92m$MEMUSE\e[90m/\e[1m\e[96m$MEMTOTAL\e[97m MB"
+	echo -e "\e[97mMem Use Min   : \e[34m$MEMUSEMIN\e[90m/\e[96m$MEMTOTAL\e[97m MB"
+        echo -e "\e[97mMem Use Max   : \e[93m$MEMUSEMAX\e[90m/\e[96m$MEMTOTAL\e[97m MB"
+	echo -e "\e[97mTemp          : \e[92m$TEMP\e[97m°C"
+	echo -e "\e[97mTemp Min      : \e[34m$MINTEMP\e[97m°C"
+        echo -e "\e[97mTemp Max      : \e[93m$MAXTEMP\e[97m°C"
+	echo -e "\e[97mFan           : \e[92m$FAN \e[97mRPM"
+	echo -e "\e[97mFan Min       : \e[34m$MINFAN \e[97mRPM"
+        echo -e "\e[97mFan Max       : \e[93m$MAXFAN \e[97mRPM"
+	echo -e "\e[97mPower         : \e[92m$POWER \e[97mW"
+	echo -e "\e[97mPower Min     : \e[34m$MINPOWER \e[97mW"
+        echo -e "\e[97mPower Max     : \e[93m$MAXPOWER \e[97mW"
+	tput civis      -- invisible
 	sleep 2
 done

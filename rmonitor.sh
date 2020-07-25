@@ -3,6 +3,14 @@
 # Script: Monitor de placa Radeon RX 580 no Arch Linux
 # Autor: Rodrigo Leutz
 
+trap ctrl_c INT
+
+function ctrl_c() {
+	setterm -cursor on
+        echo "** Saiu do programa com ctrl+c"
+	exit
+}
+
 VGA=`glxinfo -B | grep Device | awk -F"(" '{print $1}' | awk -F: '{print $2}'`
 VGA=`echo $VGA | sed 's/ *$//g'`
 MAXTEMP=`sensors | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
@@ -114,6 +122,8 @@ while :; do
 	echo -e "\e[97mPower         : \e[92m$POWER \e[97mW"
 	echo -e "\e[97mPower Min     : \e[34m$MINPOWER \e[97mW"
         echo -e "\e[97mPower Max     : \e[93m$MAXPOWER \e[97mW"
-	tput civis      -- invisible
+	echo -e ""
+        echo -e "\e[97m(Ctrl+c para Sair)"
+	setterm -cursor off
 	sleep 2
 done

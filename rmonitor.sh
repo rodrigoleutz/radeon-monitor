@@ -17,11 +17,41 @@ fi
 
 trap ctrl_c INT
 
+if [ $1 = "--help" ] || [ $1 = "-h" ]
+then
+	echo "Ajuda do Radeon Monitor"
+	echo
+	echo "rmonitor tempo  =  Seta o tempo em segundos do monitor"
+	echo "rmonitor --help =  Mostra esse menu de ajuda"
+	echo 
+	echo "Tempo padrão 2 segundos"
+	exit
+fi
+
+if [ $# -eq 1 ]
+then
+	TIME=$1
+else
+	TIME=2
+fi
+
+HWMON=1
+check_hwmon() {
+	while [ $HWMON -le 10 ]
+	do
+		if [ `cat /sys/class/hwmon/hwmon$HWMON/name` = "amdgpu" ]
+		then
+			break
+		fi
+		HWMON=`echo "$HWMON + 1"|bc`
+	done
+}
+
 function ctrl_c() {
 	setterm -cursor on
 	clear
         echo "** Saiu do programa com ctrl+c"
-	echo $DIALOGRC
+	echo $HWMON
 	exit
 }
 get_min() {
@@ -41,6 +71,8 @@ get_max() {
         fi
 }
 
+check_hwmon
+
 GLXINFO=`glxinfo -B`
 SENSORS=`sensors`
 
@@ -55,11 +87,11 @@ TEMPMIN=`echo $TEMPMAX`
 FANMIN=`echo $FANMAX`
 POWERMIN=`echo $POWERMAX`
 POWER=`echo $POWERMIN | sed 's/ *$//g'`
-GPUCLOCKMIN=`cat /sys/class/hwmon/hwmon3/freq1_input`
+GPUCLOCKMIN=`cat /sys/class/hwmon/hwmon$HWMON/freq1_input`
 GPUCLOCKMIN=`echo "$GPUCLOCKMIN / 1000000" | bc`
 GPUCLOCKMAX=`echo $GPUCLOCKMIN`
 GPUCLOCK=`echo $GPUCLOCKMIN`
-MEMCLOCKMIN=`cat /sys/class/hwmon/hwmon3/freq2_input`
+MEMCLOCKMIN=`cat /sys/class/hwmon/hwmon$HWMON/freq2_input`
 MEMCLOCKMIN=`echo "$MEMCLOCKMIN / 1000000" | bc`
 MEMCLOCKMAX=`echo $MEMCLOCKMIN`
 MEMCLOCK=`echo $MEMCLOCKMIN`
@@ -77,9 +109,9 @@ while :; do
 	TEMP=`echo "$SENSORS" | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
 	FAN=`echo "$SENSORS" | grep fan1 | awk -F: '{print $2}' | awk -F"RPM" '{print $1}'`
 	POWER=`echo "$SENSORS" | grep power1 | awk -F: '{print $2}' | awk -F"W" '{print $1}'`
-	GPUCLOCK=`cat /sys/class/hwmon/hwmon3/freq1_input`
+	GPUCLOCK=`cat /sys/class/hwmon/hwmon$HWMON/freq1_input`
 	GPUCLOCK=`echo "$GPUCLOCK / 1000000" | bc`
-	MEMCLOCK=`cat /sys/class/hwmon/hwmon3/freq2_input`
+	MEMCLOCK=`cat /sys/class/hwmon/hwmon$HWMON/freq2_input`
 	MEMCLOCK=`echo "$MEMCLOCK / 1000000" | bc`
 	MEMFREE=`echo "$GLXINFO" | grep "Currently available dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
 	MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
@@ -119,5 +151,5 @@ while :; do
         \nPower Max     : \Z3$POWERMAX \ZnW\n
         \n(\Z1Ctrl+c\Zn para Sair)" 23 40
 	setterm -cursor off
-	sleep 2
+	sleep "$TIME"
 done

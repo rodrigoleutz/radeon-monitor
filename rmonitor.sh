@@ -8,6 +8,7 @@ trap ctrl_c INT
 function ctrl_c() {
 	setterm -cursor on
         echo "** Saiu do programa com ctrl+c"
+	clear
 	exit
 }
 
@@ -102,28 +103,26 @@ while :; do
         then
                  MEMUSEMAX=$MEMUSE
         fi
-	echo -e "\e[91m$VGA"
-	echo
-	echo -e "\e[97mGPU Clock     : \e[92m$GPUCLOCK \e[97mMHz"
-	echo -e "\e[97mGPU Clock Min : \e[34m$GPUCLOCKMIN\e[97m MHz"
-        echo -e "\e[97mGPU Clock Max : \e[93m$GPUCLOCKMAX\e[97m MHz"
-	echo -e "\e[97mMem Clock     : \e[92m$MEMCLOCK \e[97mMHz"
-	echo -e "\e[97mMem Clock Min : \e[34m$MEMCLOCKMIN\e[97m MHz"
-        echo -e "\e[97mMem Clock Max : \e[93m$MEMCLOCKMAX\e[97m MHz"
-	echo -e "\e[97mMem Use       : \e[92m$MEMUSE\e[90m/\e[1m\e[96m$MEMTOTAL\e[97m MB"
-	echo -e "\e[97mMem Use Min   : \e[34m$MEMUSEMIN\e[90m/\e[96m$MEMTOTAL\e[97m MB"
-        echo -e "\e[97mMem Use Max   : \e[93m$MEMUSEMAX\e[90m/\e[96m$MEMTOTAL\e[97m MB"
-	echo -e "\e[97mTemp          : \e[92m$TEMP\e[97m°C"
-	echo -e "\e[97mTemp Min      : \e[34m$MINTEMP\e[97m°C"
-        echo -e "\e[97mTemp Max      : \e[93m$MAXTEMP\e[97m°C"
-	echo -e "\e[97mFan           : \e[92m$FAN \e[97mRPM"
-	echo -e "\e[97mFan Min       : \e[34m$MINFAN \e[97mRPM"
-        echo -e "\e[97mFan Max       : \e[93m$MAXFAN \e[97mRPM"
-	echo -e "\e[97mPower         : \e[92m$POWER \e[97mW"
-	echo -e "\e[97mPower Min     : \e[34m$MINPOWER \e[97mW"
-        echo -e "\e[97mPower Max     : \e[93m$MAXPOWER \e[97mW"
-	echo -e ""
-        echo -e "\e[97m(Ctrl+c para Sair)"
+	dialog --colors --title "\Zb\Z1$VGA" \
+	--infobox "\n\ZB\ZnGPU Clock     : \Z2$GPUCLOCK \ZnMHz
+	\nGPU Clock Min : \Z4$GPUCLOCKMIN \ZnMHz
+        \nGPU Clock Max : \Z3$GPUCLOCKMAX \ZnMHz
+	\nMem Clock     : \Z2$MEMCLOCK \ZnmMHz
+	\nMem Clock Min : \Z4$MEMCLOCKMIN \ZnMHz
+        \nMem Clock Max : \Z3$MEMCLOCKMAX \ZnMHz
+	\nMem Use       : \Z2$MEMUSE/$MEMTOTAL \ZnMB
+	\nMem Use Min   : \Z4$MEMUSEMIN/$MEMTOTAL \ZnMB
+        \nMem Use Max   : \Z3$MEMUSEMAX/$MEMTOTAL \ZnMB
+	\nTemp          : \Z2$TEMP\Zn°C
+	\nTemp Min      : \Z4$MINTEMP\Zn°C
+        \nTemp Max      : \Z3$MAXTEMP\Zn°C
+	\nFan           : \Z2$FAN \ZnRPM
+	\nFan Min       : \Z4$MINFAN \ZnRPM
+        \nFan Max       : \Z3$MAXFAN \ZnRPM
+	\nPower         : \Z2$POWER \ZnW
+	\nPower Min     : \Z4$MINPOWER \ZnW
+        \nPower Max     : \Z3$MAXPOWER \ZnW\n
+        \n(\Z1Ctrl+c\Zn para Sair)" 24 40
 	setterm -cursor off
 	sleep 2
 done

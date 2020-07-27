@@ -10,7 +10,7 @@
 # DIALOGRC=$PWD/dialogrc-rmonitor
 
 # Solução do dialogrc encontrada para copiar
-if [ -f dialogrc-rmonitor ] && [ ! -f .dialogrc ]
+if [ -f dialogrc-rmonitor ] && [ ! -f ~/.dialogrc ]
 then
     cp dialogrc-rmonitor ~/.dialogrc
 fi

@@ -3,12 +3,19 @@
 # Script: Monitor de placa Radeon RX 580 no Arch Linux
 # Autor: Rodrigo Leutz
 
+
+# Esta variavel não está funcionando corretamente.
+# Precisa encontrar solução.
+# funciona se fizer o seguinte comando: cp $PWD/dialogrc-rmonitor ~/.dialogrc
+DIALOGRC=$PWD/dialogrc-rmonitor
+
 trap ctrl_c INT
 
 function ctrl_c() {
 	setterm -cursor on
 	clear
         echo "** Saiu do programa com ctrl+c"
+	echo $DIALOGRC
 	exit
 }
 get_min() {
@@ -27,8 +34,6 @@ get_max() {
 		echo "$2"
         fi
 }
-
-dialog --create-rc .dialogrc
 
 VGA=`glxinfo -B | grep Device | awk -F"(" '{print $1}' | awk -F: '{print $2}'`
 VGA=`echo $VGA | sed 's/ *$//g'`

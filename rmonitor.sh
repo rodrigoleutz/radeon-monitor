@@ -3,17 +3,7 @@
 # Script: Monitor de placa Radeon RX 580 no Arch Linux
 # Autor: Rodrigo Leutz
 
-
-# Esta variavel não está funcionando corretamente.
-# Precisa encontrar solução.
-# funciona se fizer o seguinte comando: cp $PWD/dialogrc-rmonitor ~/.dialogrc
-# DIALOGRC=$PWD/dialogrc-rmonitor
-
-# Solução do dialogrc encontrada para copiar
-if [ -f dialogrc-rmonitor ] && [ ! -f ~/.dialogrc ]
-then
-    cp dialogrc-rmonitor ~/.dialogrc
-fi
+export DIALOGRC=$PWD/dialogrc-rmonitor
 
 trap ctrl_c INT
 
@@ -28,11 +18,10 @@ then
 	exit
 fi
 
+TIME=2
 if [ $# -eq 1 ]
 then
 	TIME=$1
-else
-	TIME=2
 fi
 
 HWMON=1
@@ -51,7 +40,7 @@ function ctrl_c() {
 	setterm -cursor on
 	clear
         echo "** Saiu do programa com ctrl+c"
-	echo $HWMON
+#	echo "hwmon$HWMON"
 	exit
 }
 get_min() {

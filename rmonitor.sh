@@ -7,33 +7,48 @@ trap ctrl_c INT
 
 function ctrl_c() {
 	setterm -cursor on
-        echo "** Saiu do programa com ctrl+c"
 	clear
+        echo "** Saiu do programa com ctrl+c"
 	exit
 }
+get_min() {
+	if [ `echo "$1 < $2"|bc` -eq 1 ]
+        then
+                echo "$1"
+	else
+		echo "$2"
+        fi
+}
+get_max() {
+	if [ `echo "$1 > $2"|bc` -eq 1 ]
+        then
+		echo "$1"
+	else
+		echo "$2"
+        fi
+}
+
+dialog --create-rc .dialogrc
 
 VGA=`glxinfo -B | grep Device | awk -F"(" '{print $1}' | awk -F: '{print $2}'`
 VGA=`echo $VGA | sed 's/ *$//g'`
-MAXTEMP=`sensors | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
-MAXFAN=`sensors | grep fan1 | awk -F: '{print $2}' | awk -F"RPM" '{print $1}'`
-MAXFAN=`echo $MAXFAN | sed 's/ *$//g'`
-MAXPOWER=`sensors | grep power1 | awk -F: '{print $2}' | awk -F"W" '{print $1}'`
-MAXPOWER=`echo $MAXPOWER | sed 's/ *$//g'`
-MINTEMP=`sensors | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
-MINFAN=`sensors | grep fan1 | awk -F: '{print $2}' | awk -F"RPM" '{print $1}'`
-MINFAN=`echo $MINFAN | sed 's/ *$//g'`
-MINPOWER=`sensors | grep power1 | awk -F: '{print $2}' | awk -F"W" '{print $1}'`
-MINPOWER=`echo $MINPOWER | sed 's/ *$//g'`
-GPUCLOCK=`cat /sys/class/hwmon/hwmon3/freq1_input`
+TEMPMAX=`sensors | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
+FANMAX=`sensors | grep fan1 | awk -F: '{print $2}' | awk -F"RPM" '{print $1}'`
+FANMAX=`echo $FANMAX | sed 's/ *$//g'`
+POWERMAX=`sensors | grep power1 | awk -F: '{print $2}' | awk -F"W" '{print $1}'`
+POWERMAX=`echo $POWERMAX | sed 's/ *$//g'`
+TEMPMIN=`echo $TEMPMAX`
+FANMIN=`echo $FANMAX`
+POWERMIN=`echo $POWERMAX`
+POWER=`echo $POWERMIN | sed 's/ *$//g'`
 GPUCLOCKMIN=`cat /sys/class/hwmon/hwmon3/freq1_input`
 GPUCLOCKMIN=`echo "$GPUCLOCKMIN / 1000000" | bc`
-GPUCLOCKMAX=`cat /sys/class/hwmon/hwmon3/freq1_input`
-GPUCLOCKMAX=`echo "$GPUCLOCKMAX / 1000000" | bc`
-MEMCLOCK=`cat /sys/class/hwmon/hwmon3/freq2_input`
+GPUCLOCKMAX=`echo $GPUCLOCKMIN`
+GPUCLOCK=`echo $GPUCLOCKMIN`
 MEMCLOCKMIN=`cat /sys/class/hwmon/hwmon3/freq2_input`
-MEMCLOCKMIN=`echo "$MEMCLOCK / 1000000" | bc`
-MEMCLOCKMAX=`cat /sys/class/hwmon/hwmon3/freq2_input`
-MEMCLOCKMAX=`echo "$MEMCLOCK / 1000000" | bc`
+MEMCLOCKMIN=`echo "$MEMCLOCKMIN / 1000000" | bc`
+MEMCLOCKMAX=`echo $MEMCLOCKMIN`
+MEMCLOCK=`echo $MEMCLOCKMIN`
 MEMFREE=`glxinfo -B | grep "Currently available dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
 MEMTOTAL=`glxinfo -B | grep "Dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
 MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
@@ -52,77 +67,40 @@ while :; do
 	MEMFREE=`glxinfo -B | grep "Currently available dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
 	MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
 	MEMUSE=`echo "$MEMTOTAL - $MEMFREE"|bc`
-	clear
 	POWER=`echo $POWER | sed 's/ *$//g'`
 	FAN=`echo $FAN | sed 's/ *$//g'`
-	if [ `echo "$TEMP < $MINTEMP"|bc` -eq 1 ]
-        then
-                 MINTEMP=$TEMP
-        fi
-	if [ `echo "$TEMP > $MAXTEMP"|bc` -eq 1 ]
-        then
-                 MAXTEMP=$TEMP
-        fi
-	if [ `echo "$FAN < $MINFAN"|bc` -eq 1 ]
-        then
-                 MINFAN=$FAN
-        fi
-        if [ `echo "$FAN > $MAXFAN"|bc` -eq 1 ]
-        then
-                 MAXFAN=$FAN
-        fi
-	if [ `echo "$POWER < $MINPOWER"|bc` -eq 1 ]
-        then
-                 MINPOWER=$POWER
-        fi
-        if [ `echo "$POWER > $MAXPOWER"|bc` -eq 1 ]
-        then
-                 MAXPOWER=$POWER
-        fi
-	if [ `echo "$GPUCLOCK < $GPUCLOCKMIN"|bc` -eq 1 ]
-        then
-                 GPUCLOCKMIN=$GPUCLOCK
-        fi
-        if [ `echo "$GPUCLOCK > $GPUCLOCKMAX"|bc` -eq 1 ]
-        then
-                 GPUCLOCKMAX=$GPUCLOCK
-        fi
-        if [ `echo "$MEMCLOCK < $MEMCLOCKMIN"|bc` -eq 1 ]
-        then
-                 MEMCLOCKMIN=$MEMCLOCK
-        fi
-        if [ `echo "$MEMCLOCK > $MEMCLOCKMAX"|bc` -eq 1 ]
-        then
-                 MEMCLOCKMAX=$MEMCLOCK
-        fi
-	if [ `echo "$MEMUSE < $MEMUSEMIN"|bc` -eq 1 ]
-        then
-                 MEMUSEMIN=$MEMUSE
-        fi
-        if [ `echo "$MEMUSE > $MEMUSEMAX"|bc` -eq 1 ]
-        then
-                 MEMUSEMAX=$MEMUSE
-        fi
+	TEMPMIN=`get_min $TEMP $TEMPMIN`
+	TEMPMAX=`get_max $TEMP $TEMPMAX`
+	FANMIN=`get_min $FAN $FANMIN`
+	FANMAX=`get_max $FAN $FANMAX`
+	POWERMIN=`get_min $POWER $POWERMIN`
+	POWERMAX=`get_max $POWER $POWERMAX`
+	GPUCLOCKMIN=`get_min $GPUCLOCK $GPUCLOCKMIN`
+	GPUCLOCKMAX=`get_max $GPUCLOCK $GPUCLOCKMAX`
+        MEMCLOCKMIN=`get_min $MEMCLOCK $MEMCLOCKMIN`
+	MEMCLOCKMAX=`get_max $MEMCLOCK $MEMCLOCKMAX`
+	MEMUSEMIN=`get_min $MEMUSE $MEMUSEMIN`
+	MEMUSEMAX=`get_max $MEMUSE $MEMUSEMAX`
 	dialog --colors --title "\Zb\Z1$VGA" \
 	--infobox "\n\ZB\ZnGPU Clock     : \Z2$GPUCLOCK \ZnMHz
 	\nGPU Clock Min : \Z4$GPUCLOCKMIN \ZnMHz
         \nGPU Clock Max : \Z3$GPUCLOCKMAX \ZnMHz
-	\nMem Clock     : \Z2$MEMCLOCK \ZnmMHz
+	\nMem Clock     : \Z2$MEMCLOCK \ZnMHz
 	\nMem Clock Min : \Z4$MEMCLOCKMIN \ZnMHz
         \nMem Clock Max : \Z3$MEMCLOCKMAX \ZnMHz
 	\nMem Use       : \Z2$MEMUSE/$MEMTOTAL \ZnMB
 	\nMem Use Min   : \Z4$MEMUSEMIN/$MEMTOTAL \ZnMB
         \nMem Use Max   : \Z3$MEMUSEMAX/$MEMTOTAL \ZnMB
 	\nTemp          : \Z2$TEMP\Zn°C
-	\nTemp Min      : \Z4$MINTEMP\Zn°C
-        \nTemp Max      : \Z3$MAXTEMP\Zn°C
+	\nTemp Min      : \Z4$TEMPMIN\Zn°C
+        \nTemp Max      : \Z3$TEMPMAX\Zn°C
 	\nFan           : \Z2$FAN \ZnRPM
-	\nFan Min       : \Z4$MINFAN \ZnRPM
-        \nFan Max       : \Z3$MAXFAN \ZnRPM
+	\nFan Min       : \Z4$FANMIN \ZnRPM
+        \nFan Max       : \Z3$FANMAX \ZnRPM
 	\nPower         : \Z2$POWER \ZnW
-	\nPower Min     : \Z4$MINPOWER \ZnW
-        \nPower Max     : \Z3$MAXPOWER \ZnW\n
-        \n(\Z1Ctrl+c\Zn para Sair)" 24 40
+	\nPower Min     : \Z4$POWERMIN \ZnW
+        \nPower Max     : \Z3$POWERMAX \ZnW\n
+        \n(\Z1Ctrl+c\Zn para Sair)" 23 40
 	setterm -cursor off
 	sleep 2
 done

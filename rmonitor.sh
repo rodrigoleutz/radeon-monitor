@@ -92,7 +92,7 @@ while :; do
 	MEMCLOCKMAX=`get_max $MEMCLOCK $MEMCLOCKMAX`
 	MEMUSEMIN=`get_min $MEMUSE $MEMUSEMIN`
 	MEMUSEMAX=`get_max $MEMUSE $MEMUSEMAX`
-	dialog --colors --title "\Zb\Z1$VGA" \
+	dialog --colors --title "\Zb\Z1 $VGA " \
 	--infobox "\n\ZB\ZnGPU Clock     : \Z2$GPUCLOCK \ZnMHz
 	\nGPU Clock Min : \Z4$GPUCLOCKMIN \ZnMHz
         \nGPU Clock Max : \Z3$GPUCLOCKMAX \ZnMHz

@@ -7,7 +7,13 @@
 # Esta variavel não está funcionando corretamente.
 # Precisa encontrar solução.
 # funciona se fizer o seguinte comando: cp $PWD/dialogrc-rmonitor ~/.dialogrc
-DIALOGRC=$PWD/dialogrc-rmonitor
+# DIALOGRC=$PWD/dialogrc-rmonitor
+
+# Solução do dialogrc encontrada para copiar
+if [ -f dialogrc-rmonitor ] && [ ! -f .dialogrc ]
+then
+    cp dialogrc-rmonitor ~/.dialogrc
+fi
 
 trap ctrl_c INT
 

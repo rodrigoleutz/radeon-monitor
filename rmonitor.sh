@@ -5,6 +5,13 @@
 
 export DIALOGRC=$PWD/dialogrc-rmonitor
 
+# Se tiver problemas com o dialogrc descomente as seguintes linhas do if
+#if [ -f dialogrc-rmonitor ] && [ ! -f ~/.dialogrc ]
+#then
+#    cp dialogrc-rmonitor ~/.dialogrc
+#fi
+
+
 trap ctrl_c INT
 
 if [ $1 = "--help" ] || [ $1 = "-h" ]

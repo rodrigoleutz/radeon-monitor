@@ -98,6 +98,15 @@ MEMTOTAL=`echo $MEMTOTAL | sed 's/ *$//g'`
 MEMUSEMAX=`echo "$MEMTOTAL - $MEMFREE"|bc`
 MEMUSEMIN=`echo "$MEMTOTAL - $MEMFREE"|bc`
 
+logrmonitor() {
+	echo "GPU Clock: ( $GPUCLOCK ) [ $GPUCLOCKMIN ] { $GPUCLOCKMAX }" > ~/.rmonitor/rmonitor.log
+	echo "Mem Clock: ( $MEMCLOCK ) [ $MEMCLOCKMIN ] { $MEMCLOCKMAX }" >> ~/.rmonitor/rmonitor.log
+	echo "Mem Use: ( $MEMUSE ) [ $MEMUSEMIN ] [ $MEMUSEMAX ]" >> ~/.rmonitor/rmonitor.log
+	echo "Temp: ( $TEMP ) [ $TEMPMIN ] { $TEMPMAX }" >> ~/.rmonitor/rmonitor.log
+	echo "Fan: ( $FAN ) [ $FANMIN ] { $FANMAX }" >> ~/.rmonitor/rmonitor.log
+	echo "Power: ( $POWER ) [ $POWERMIN ] { $POWERMAX }" >> ~/.rmonitor/rmonitor.log
+}
+
 while :; do
 	GLXINFO=`glxinfo -B`
 	SENSORS=`sensors`
@@ -126,6 +135,7 @@ while :; do
 	MEMCLOCKMAX=`get_max $MEMCLOCK $MEMCLOCKMAX`
 	MEMUSEMIN=`get_min $MEMUSE $MEMUSEMIN`
 	MEMUSEMAX=`get_max $MEMUSE $MEMUSEMAX`
+	logrmonitor
 	dialog --colors --title "\Zb\Z1 $VGA " \
 	--infobox "\n\ZB\ZnGPU Clock     : \Z2$GPUCLOCK \ZnMHz
 	\nGPU Clock Min : \Z4$GPUCLOCKMIN \ZnMHz
@@ -145,7 +155,7 @@ while :; do
 	\nPower         : \Z2$POWER \ZnW
 	\nPower Min     : \Z4$POWERMIN \ZnW
         \nPower Max     : \Z3$POWERMAX \ZnW\n
-        \n(\Z1Ctrl+c\Zn para Sair)" 23 40
+        \n(\Z1Ctrl+c\Zn para Sair)" 0 0
 	setterm -cursor off
 	sleep "$TIME"
 done

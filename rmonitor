@@ -97,20 +97,34 @@ get_max() {
 }
 
 ##
+##	Check MAX and MIN values
+##
+check_max_min() {
+        TEMPMIN=`get_min $TEMP $TEMPMIN`
+        TEMPMAX=`get_max $TEMP $TEMPMAX`
+        FANMIN=`get_min $FAN $FANMIN`
+        FANMAX=`get_max $FAN $FANMAX`
+        POWERMIN=`get_min $POWER $POWERMIN`
+        POWERMAX=`get_max $POWER $POWERMAX`
+        GPUCLOCKMIN=`get_min $GPUCLOCK $GPUCLOCKMIN`
+        GPUCLOCKMAX=`get_max $GPUCLOCK $GPUCLOCKMAX`
+        MEMCLOCKMIN=`get_min $MEMCLOCK $MEMCLOCKMIN`
+        MEMCLOCKMAX=`get_max $MEMCLOCK $MEMCLOCKMAX`
+        MEMUSEMIN=`get_min $MEMUSE $MEMUSEMIN`
+        MEMUSEMAX=`get_max $MEMUSE $MEMUSEMAX`
+}
+
+##
 ##	Use function to set hwmon
 ##
 check_hwmon
 
 ##
-##	Base commands to running
-##
-GLXINFO=`glxinfo -B`
-SENSORS=`sensors`
-
-##
 ##	Base Vars
 ##
 basevars() {
+	GLXINFO=`glxinfo -B`
+	SENSORS=`sensors`
 	TEMP=`echo "$SENSORS" | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
         FAN=`echo "$SENSORS" | grep fan1 | awk -F: '{print $2}' | awk -F"RPM" '{print $1}'`
         POWER=`echo "$SENSORS" | grep power1 | awk -F: '{print $2}' | awk -F"W" '{print $1}'`
@@ -170,22 +184,8 @@ createlogdir
 ##	Main
 ##
 while :; do
-	GLXINFO=`glxinfo -B`
-	SENSORS=`sensors`
-
 	basevars
-	TEMPMIN=`get_min $TEMP $TEMPMIN`
-	TEMPMAX=`get_max $TEMP $TEMPMAX`
-	FANMIN=`get_min $FAN $FANMIN`
-	FANMAX=`get_max $FAN $FANMAX`
-	POWERMIN=`get_min $POWER $POWERMIN`
-	POWERMAX=`get_max $POWER $POWERMAX`
-	GPUCLOCKMIN=`get_min $GPUCLOCK $GPUCLOCKMIN`
-	GPUCLOCKMAX=`get_max $GPUCLOCK $GPUCLOCKMAX`
-        MEMCLOCKMIN=`get_min $MEMCLOCK $MEMCLOCKMIN`
-	MEMCLOCKMAX=`get_max $MEMCLOCK $MEMCLOCKMAX`
-	MEMUSEMIN=`get_min $MEMUSE $MEMUSEMIN`
-	MEMUSEMAX=`get_max $MEMUSE $MEMUSEMAX`
+	check_max_min
 	logrmonitor
 	dialog --colors --title "\Zb\Z1 $VGA " \
 	--infobox "\n\ZB\ZnGPU Clock     : \Z2$GPUCLOCK \ZnMHz

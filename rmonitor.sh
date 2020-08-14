@@ -1,35 +1,53 @@
 #!/bin/bash
 
-# Script: Monitor de placa Radeon RX 580 no Arch Linux
-# Autor: Rodrigo Leutz
+# Script: 	Radeon GPU Monitor
+# Autor:	Rodrigo Leutz
 
+##
+##	Export dialogrc file
+##
 export DIALOGRC=$PWD/dialogrc-rmonitor
 
-# Se tiver problemas com o dialogrc descomente as seguintes linhas do if
+##
+##	If have a trouble with the dialogrs export uncomment next lines
+##
 #if [ -f dialogrc-rmonitor ] && [ ! -f ~/.dialogrc ]
 #then
 #    cp dialogrc-rmonitor ~/.dialogrc
 #fi
 
-
+##
+##	Exit trap with Ctrl+C
+##
 trap ctrl_c INT
 
+##
+##	Command --help 
+##
 if [ $1 = "--help" ] || [ $1 = "-h" ]
 then
-	echo "Ajuda do Radeon Monitor"
+	echo "Radeon Monitor Help"
 	echo
-	echo "rmonitor tempo  =  Seta o tempo em segundos do monitor"
-	echo "rmonitor --help =  Mostra esse menu de ajuda"
+	echo "rmonitor time  =  Set the time to reload in seconds"
+	echo "rmonitor --help =  Show this help"
 	echo 
-	echo "Tempo padrão 2 segundos"
+	echo "Default time 2 seconds"
 	exit
 fi
+
+##
+## 	Set the timer
+##
 
 TIME=2
 if [ $# -eq 1 ]
 then
 	TIME=$1
 fi
+
+##
+##	Search for amdgpu hwmon
+##
 
 HWMON=1
 check_hwmon() {
@@ -43,6 +61,9 @@ check_hwmon() {
 	done
 }
 
+##
+##	Crtl+C function to exit the program
+##
 function ctrl_c() {
 	setterm -cursor on
 	clear
@@ -50,6 +71,10 @@ function ctrl_c() {
 #	echo "hwmon$HWMON"
 	exit
 }
+
+##
+##	Get MIN in vars
+##
 get_min() {
 	if [ `echo "$1 < $2"|bc` -eq 1 ]
         then
@@ -58,6 +83,10 @@ get_min() {
 		echo "$2"
         fi
 }
+
+##
+##	Get MAX in vars
+##
 get_max() {
 	if [ `echo "$1 > $2"|bc` -eq 1 ]
         then
@@ -67,11 +96,20 @@ get_max() {
         fi
 }
 
+##
+##	Use function to set hwmon
+##
 check_hwmon
 
+##
+##	Base commands to running
+##
 GLXINFO=`glxinfo -B`
 SENSORS=`sensors`
 
+##
+##	Base Vars
+##
 VGA=`echo "$GLXINFO" | grep Device | awk -F"(" '{print $1}' | awk -F: '{print $2}'`
 VGA=`echo $VGA | sed 's/ *$//g'`
 TEMPMAX=`echo "$SENSORS" | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
@@ -98,15 +136,32 @@ MEMTOTAL=`echo $MEMTOTAL | sed 's/ *$//g'`
 MEMUSEMAX=`echo "$MEMTOTAL - $MEMFREE"|bc`
 MEMUSEMIN=`echo "$MEMTOTAL - $MEMFREE"|bc`
 
+##
+##	Function to Log
+##
 logrmonitor() {
+	DATA=`date`
 	echo "GPU Clock: ( $GPUCLOCK ) [ $GPUCLOCKMIN ] { $GPUCLOCKMAX }" > ~/.rmonitor/rmonitor.log
 	echo "Mem Clock: ( $MEMCLOCK ) [ $MEMCLOCKMIN ] { $MEMCLOCKMAX }" >> ~/.rmonitor/rmonitor.log
 	echo "Mem Use: ( $MEMUSE ) [ $MEMUSEMIN ] [ $MEMUSEMAX ]" >> ~/.rmonitor/rmonitor.log
 	echo "Temp: ( $TEMP ) [ $TEMPMIN ] { $TEMPMAX }" >> ~/.rmonitor/rmonitor.log
 	echo "Fan: ( $FAN ) [ $FANMIN ] { $FANMAX }" >> ~/.rmonitor/rmonitor.log
 	echo "Power: ( $POWER ) [ $POWERMIN ] { $POWERMAX }" >> ~/.rmonitor/rmonitor.log
+	echo "Date: $DATA" >> ~/.rmonitor/rmonitor.log
 }
+createlogdir(){
+	if [ -e "~/.rmonitor" ]
+	then
+		echo "Directory exists."
+	else
+		mkdir ~/.rmonitor
+	fi
+}
+createlogdir
 
+##
+##	Main
+##
 while :; do
 	GLXINFO=`glxinfo -B`
 	SENSORS=`sensors`

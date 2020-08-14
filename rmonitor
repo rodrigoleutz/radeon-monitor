@@ -26,10 +26,10 @@ trap ctrl_c INT
 ##
 if [ $1 = "--help" ] || [ $1 = "-h" ]
 then
-	echo "Radeon Monitor Help"
+	echo "Radeon GPU Monitor Help"
 	echo
-	echo "rmonitor time  =  Set the time to reload in seconds"
-	echo "rmonitor --help =  Show this help"
+	echo "rmonitor time	=  Set the time to reload in seconds"
+	echo "rmonitor --help	=  Show this help"
 	echo 
 	echo "Default time 2 seconds"
 	exit
@@ -110,26 +110,33 @@ SENSORS=`sensors`
 ##
 ##	Base Vars
 ##
+basevars() {
+	TEMP=`echo "$SENSORS" | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
+        FAN=`echo "$SENSORS" | grep fan1 | awk -F: '{print $2}' | awk -F"RPM" '{print $1}'`
+        POWER=`echo "$SENSORS" | grep power1 | awk -F: '{print $2}' | awk -F"W" '{print $1}'`
+        GPUCLOCK=`cat /sys/class/hwmon/hwmon$HWMON/freq1_input`
+        GPUCLOCK=`echo "$GPUCLOCK / 1000000" | bc`
+        MEMCLOCK=`cat /sys/class/hwmon/hwmon$HWMON/freq2_input`
+        MEMCLOCK=`echo "$MEMCLOCK / 1000000" | bc`
+        MEMFREE=`echo "$GLXINFO" | grep "Currently available dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
+        MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
+        MEMUSE=`echo "$MEMTOTAL - $MEMFREE"|bc`
+        POWER=`echo $POWER | sed 's/ *$//g'`
+        FAN=`echo $FAN | sed 's/ *$//g'`
+}
+basevars
 VGA=`echo "$GLXINFO" | grep Device | awk -F"(" '{print $1}' | awk -F: '{print $2}'`
 VGA=`echo $VGA | sed 's/ *$//g'`
-TEMPMAX=`echo "$SENSORS" | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
-FANMAX=`echo "$SENSORS" | grep fan1 | awk -F: '{print $2}' | awk -F"RPM" '{print $1}'`
-FANMAX=`echo $FANMAX | sed 's/ *$//g'`
-POWERMAX=`echo "$SENSORS" | grep power1 | awk -F: '{print $2}' | awk -F"W" '{print $1}'`
-POWERMAX=`echo $POWERMAX | sed 's/ *$//g'`
-TEMPMIN=`echo $TEMPMAX`
+TEMPMAX=`echo $TEMP`
+FANMAX=`echo $FAN`
+POWERMAX=`echo $POWER`
+TEMPMIN=`echo $TEMP`
 FANMIN=`echo $FANMAX`
-POWERMIN=`echo $POWERMAX`
-POWER=`echo $POWERMIN | sed 's/ *$//g'`
-GPUCLOCKMIN=`cat /sys/class/hwmon/hwmon$HWMON/freq1_input`
-GPUCLOCKMIN=`echo "$GPUCLOCKMIN / 1000000" | bc`
-GPUCLOCKMAX=`echo $GPUCLOCKMIN`
-GPUCLOCK=`echo $GPUCLOCKMIN`
-MEMCLOCKMIN=`cat /sys/class/hwmon/hwmon$HWMON/freq2_input`
-MEMCLOCKMIN=`echo "$MEMCLOCKMIN / 1000000" | bc`
-MEMCLOCKMAX=`echo $MEMCLOCKMIN`
-MEMCLOCK=`echo $MEMCLOCKMIN`
-MEMFREE=`echo "$GLXINFO" | grep "Currently available dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
+POWERMIN=`echo $POWER`
+GPUCLOCKMIN=`echo $GPUCLOCK`
+GPUCLOCKMAX=`echo $GPUCLOCK`
+MEMCLOCKMIN=`echo $MEMCLOCK`
+MEMCLOCKMAX=`echo $MEMCLOCK`
 MEMTOTAL=`echo "$GLXINFO" | grep "Dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
 MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
 MEMTOTAL=`echo $MEMTOTAL | sed 's/ *$//g'`
@@ -166,18 +173,7 @@ while :; do
 	GLXINFO=`glxinfo -B`
 	SENSORS=`sensors`
 
-	TEMP=`echo "$SENSORS" | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
-	FAN=`echo "$SENSORS" | grep fan1 | awk -F: '{print $2}' | awk -F"RPM" '{print $1}'`
-	POWER=`echo "$SENSORS" | grep power1 | awk -F: '{print $2}' | awk -F"W" '{print $1}'`
-	GPUCLOCK=`cat /sys/class/hwmon/hwmon$HWMON/freq1_input`
-	GPUCLOCK=`echo "$GPUCLOCK / 1000000" | bc`
-	MEMCLOCK=`cat /sys/class/hwmon/hwmon$HWMON/freq2_input`
-	MEMCLOCK=`echo "$MEMCLOCK / 1000000" | bc`
-	MEMFREE=`echo "$GLXINFO" | grep "Currently available dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
-	MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
-	MEMUSE=`echo "$MEMTOTAL - $MEMFREE"|bc`
-	POWER=`echo $POWER | sed 's/ *$//g'`
-	FAN=`echo $FAN | sed 's/ *$//g'`
+	basevars
 	TEMPMIN=`get_min $TEMP $TEMPMIN`
 	TEMPMAX=`get_max $TEMP $TEMPMAX`
 	FANMIN=`get_min $FAN $FANMIN`

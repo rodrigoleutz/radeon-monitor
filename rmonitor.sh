@@ -141,13 +141,15 @@ MEMUSEMIN=`echo "$MEMTOTAL - $MEMFREE"|bc`
 ##
 logrmonitor() {
 	DATA=`date`
-	echo "GPU Clock: ( $GPUCLOCK ) [ $GPUCLOCKMIN ] { $GPUCLOCKMAX }" > ~/.rmonitor/rmonitor.log
-	echo "Mem Clock: ( $MEMCLOCK ) [ $MEMCLOCKMIN ] { $MEMCLOCKMAX }" >> ~/.rmonitor/rmonitor.log
-	echo "Mem Use: ( $MEMUSE ) [ $MEMUSEMIN ] [ $MEMUSEMAX ]" >> ~/.rmonitor/rmonitor.log
-	echo "Temp: ( $TEMP ) [ $TEMPMIN ] { $TEMPMAX }" >> ~/.rmonitor/rmonitor.log
-	echo "Fan: ( $FAN ) [ $FANMIN ] { $FANMAX }" >> ~/.rmonitor/rmonitor.log
-	echo "Power: ( $POWER ) [ $POWERMIN ] { $POWERMAX }" >> ~/.rmonitor/rmonitor.log
+	echo "Radeon GPU Monitor Log" > ~/.rmonitor/rmonitor.log
 	echo "Date: $DATA" >> ~/.rmonitor/rmonitor.log
+	echo "" >> ~/.rmonitor/rmonitor.log
+	echo "GPU Clock: ( $GPUCLOCK MHz ) [ $GPUCLOCKMIN MHz ] { $GPUCLOCKMAX MHz }" >> ~/.rmonitor/rmonitor.log
+	echo "Mem Clock: ( $MEMCLOCK MHz ) [ $MEMCLOCKMIN MHz ] { $MEMCLOCKMAX MHz }" >> ~/.rmonitor/rmonitor.log
+	echo "Mem Use: ( $MEMUSE/$MEMTOTAL MB ) [ $MEMUSEMIN/$MEMTOTAL MB ] [ $MEMUSEMAX/$MEMTOTAL MB ]" >> ~/.rmonitor/rmonitor.log
+	echo "Temp: ( $TEMP°C ) [ $TEMPMIN°C ] { $TEMPMAX°C }" >> ~/.rmonitor/rmonitor.log
+	echo "Fan: ( $FAN RPM ) [ $FANMIN RPM ] { $FANMAX RPM }" >> ~/.rmonitor/rmonitor.log
+	echo "Power: ( $POWER W ) [ $POWERMIN W ] { $POWERMAX W }" >> ~/.rmonitor/rmonitor.log
 }
 createlogdir(){
 	if [ ! -e "~/.rmonitor" ]

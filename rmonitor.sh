@@ -150,10 +150,8 @@ logrmonitor() {
 	echo "Date: $DATA" >> ~/.rmonitor/rmonitor.log
 }
 createlogdir(){
-	if [ -e "~/.rmonitor" ]
+	if [ ! -e "~/.rmonitor" ]
 	then
-		echo "Directory exists."
-	else
 		mkdir ~/.rmonitor
 	fi
 }

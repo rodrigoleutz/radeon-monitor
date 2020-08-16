@@ -165,6 +165,7 @@ logrmonitor() {
 	echo "Radeon GPU Monitor Log" > ~/.rmonitor/rmonitor.log
 	echo "Date: $DATA" >> ~/.rmonitor/rmonitor.log
 	echo "" >> ~/.rmonitor/rmonitor.log
+	echo "GPU: $VGA"
 	echo "GPU Clock: ( $GPUCLOCK MHz ) [ $GPUCLOCKMIN MHz ] { $GPUCLOCKMAX MHz }" >> ~/.rmonitor/rmonitor.log
 	echo "Mem Clock: ( $MEMCLOCK MHz ) [ $MEMCLOCKMIN MHz ] { $MEMCLOCKMAX MHz }" >> ~/.rmonitor/rmonitor.log
 	echo "Mem Use: ( $MEMUSE/$MEMTOTAL MB ) [ $MEMUSEMIN/$MEMTOTAL MB ] [ $MEMUSEMAX/$MEMTOTAL MB ]" >> ~/.rmonitor/rmonitor.log

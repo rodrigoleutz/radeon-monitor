@@ -126,7 +126,7 @@ basevars() {
 	GLXINFO=`glxinfo -B`
 	SENSORS=`sensors`
 	TEMP=`echo "$SENSORS" | grep edge | awk -F+ '{ print $2 }' | awk -F° '{print $1}'`
-        FAN=`echo "$SENSORS" | grep fan1 | awk -F: '{print $2}' | awk -F"RPM" '{print $1}'`
+        FAN=`cat /sys/class/hwmon/hwmon$HWMON/fan1_input`
         POWER=`echo "$SENSORS" | grep power1 | awk -F: '{print $2}' | awk -F"W" '{print $1}'`
         GPUCLOCK=`cat /sys/class/hwmon/hwmon$HWMON/freq1_input`
         GPUCLOCK=`echo "$GPUCLOCK / 1000000" | bc`

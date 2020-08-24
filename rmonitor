@@ -25,6 +25,8 @@ trap ctrl_c INT
 ##	Init vars
 ##
 TIME=2
+TIMES=-1
+TIMESCOUNT=0
 HWMON=0
 
 ##
@@ -33,8 +35,9 @@ HWMON=0
 help_function() {
 	echo "Radeon GPU Monitor Help"
 	echo
-	echo "rmonitor -t 	=  Set time to reload in seconds"
-	echo "rmonitor -h	=  Show this help"
+	echo "$0 -n	=  Set how many times will run"
+	echo "$0 -t 	=  Set time to reload in seconds"
+	echo "$0 -h	=  Show this help"
 	echo 
 	echo "Default time 2 seconds"
 	exit
@@ -109,11 +112,6 @@ check_max_min() {
 }
 
 ##
-##	Use function to set hwmon
-##
-check_hwmon
-
-##
 ##	Base Vars
 ##
 basevars() {
@@ -132,24 +130,26 @@ basevars() {
         POWER=`echo $POWER | sed 's/ *$//g'`
         FAN=`echo $FAN | sed 's/ *$//g'`
 }
-basevars
-VGA=`echo "$GLXINFO" | grep Device | awk -F"(" '{print $1}' | awk -F: '{print $2}'`
-VGA=`echo $VGA | sed 's/ *$//g'`
-TEMPMAX=`echo $TEMP`
-FANMAX=`echo $FAN`
-POWERMAX=`echo $POWER`
-TEMPMIN=`echo $TEMP`
-FANMIN=`echo $FANMAX`
-POWERMIN=`echo $POWER`
-GPUCLOCKMIN=`echo $GPUCLOCK`
-GPUCLOCKMAX=`echo $GPUCLOCK`
-MEMCLOCKMIN=`echo $MEMCLOCK`
-MEMCLOCKMAX=`echo $MEMCLOCK`
-MEMTOTAL=`echo "$GLXINFO" | grep "Dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
-MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
-MEMTOTAL=`echo $MEMTOTAL | sed 's/ *$//g'`
-MEMUSEMAX=`echo "$MEMTOTAL - $MEMFREE"|bc`
-MEMUSEMIN=`echo "$MEMTOTAL - $MEMFREE"|bc`
+setbasevars() {
+	basevars
+	VGA=`echo "$GLXINFO" | grep Device | awk -F"(" '{print $1}' | awk -F: '{print $2}'`
+	VGA=`echo $VGA | sed 's/ *$//g'`
+	TEMPMAX=`echo $TEMP`
+	FANMAX=`echo $FAN`
+	POWERMAX=`echo $POWER`
+	TEMPMIN=`echo $TEMP`
+	FANMIN=`echo $FANMAX`
+	POWERMIN=`echo $POWER`
+	GPUCLOCKMIN=`echo $GPUCLOCK`
+	GPUCLOCKMAX=`echo $GPUCLOCK`
+	MEMCLOCKMIN=`echo $MEMCLOCK`
+	MEMCLOCKMAX=`echo $MEMCLOCK`
+	MEMTOTAL=`echo "$GLXINFO" | grep "Dedicated video memory:" | awk -F: '{print $2}' | awk -F"MB" '{print $1}'`
+	MEMFREE=`echo $MEMFREE | sed 's/ *$//g'`
+	MEMTOTAL=`echo $MEMTOTAL | sed 's/ *$//g'`
+	MEMUSEMAX=`echo "$MEMTOTAL - $MEMFREE"|bc`
+	MEMUSEMIN=`echo "$MEMTOTAL - $MEMFREE"|bc`
+}
 
 ##
 ##	Function to Log
@@ -179,7 +179,10 @@ createlogdir
 ##	Dialog program
 ##
 dialog_rmonitor(){
-	while :; do
+	check_hwmon
+	setbasevars	
+	while [ $TIMES -ne $TIMESCOUNT ] 
+	do
         	basevars
 	        check_max_min
 	        logrmonitor
@@ -205,29 +208,31 @@ dialog_rmonitor(){
 	        \n(\Z1Ctrl+c\Zn para Sair)" 0 0
 	        setterm -cursor off
 	        sleep "$TIME"
+		let "++TIMESCOUNT"
 	done
+        setterm -cursor on
+	clear
 }
 
 ##
 ##	Main
 ##
-while getopts "ht:" OPTION
+while getopts "ht:n:" OPTION
 do
 	case $OPTION in
 		h)
 			help_function
 			;;
+		n)
+			TIMES=$OPTARG
+			;;
 		t)
 			TIME=$OPTARG
-			dialog_rmonitor
-			;;
-		*)
-			dialog_rmonitor
 			;;
 	esac
 done
 
-if [[ -t $TIMEARG ]]
+if [[ -t $TIMEARG ]] || [[ -n $TIMESARG ]]
 then 
 	dialog_rmonitor
 else

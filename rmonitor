@@ -22,34 +22,28 @@ export DIALOGRC=$PWD/dialogrc-rmonitor
 trap ctrl_c INT
 
 ##
+##	Init vars
+##
+TIME=2
+HWMON=0
+
+##
 ##	Command --help 
 ##
-if [ $1 = "--help" ] || [ $1 = "-h" ]
-then
+help_function() {
 	echo "Radeon GPU Monitor Help"
 	echo
-	echo "rmonitor time	=  Set the time to reload in seconds"
-	echo "rmonitor --help	=  Show this help"
+	echo "rmonitor -t 	=  Set time to reload in seconds"
+	echo "rmonitor -h	=  Show this help"
 	echo 
 	echo "Default time 2 seconds"
 	exit
-fi
-
-##
-## 	Set the timer
-##
-
-TIME=2
-if [ $# -eq 1 ]
-then
-	TIME=$1
-fi
+}
 
 ##
 ##	Search for amdgpu hwmon
 ##
 
-HWMON=1
 check_hwmon() {
 	while [ $HWMON -le 10 ]
 	do
@@ -174,7 +168,7 @@ logrmonitor() {
 	echo "Power: ( $POWER W ) [ $POWERMIN W ] { $POWERMAX W }" >> ~/.rmonitor/rmonitor.log
 }
 createlogdir(){
-	if [ ! -e "~/.rmonitor" ]
+	if [ ! -e "$HOME/.rmonitor" ];
 	then
 		mkdir ~/.rmonitor
 	fi
@@ -182,32 +176,60 @@ createlogdir(){
 createlogdir
 
 ##
+##	Dialog program
+##
+dialog_rmonitor(){
+	while :; do
+        	basevars
+	        check_max_min
+	        logrmonitor
+        	dialog --colors --title "\Zb\Z1 $VGA " \
+	        --infobox "\n\ZB\ZnGPU Clock     : \Z2$GPUCLOCK \ZnMHz
+	        \nGPU Clock Min : \Z4$GPUCLOCKMIN \ZnMHz
+	        \nGPU Clock Max : \Z3$GPUCLOCKMAX \ZnMHz
+	        \nMem Clock     : \Z2$MEMCLOCK \ZnMHz
+	        \nMem Clock Min : \Z4$MEMCLOCKMIN \ZnMHz
+	        \nMem Clock Max : \Z3$MEMCLOCKMAX \ZnMHz
+	        \nMem Use       : \Z2$MEMUSE/$MEMTOTAL \ZnMB
+	        \nMem Use Min   : \Z4$MEMUSEMIN/$MEMTOTAL \ZnMB
+	        \nMem Use Max   : \Z3$MEMUSEMAX/$MEMTOTAL \ZnMB
+	        \nTemp          : \Z2$TEMP\Zn°C
+	        \nTemp Min      : \Z4$TEMPMIN\Zn°C
+	        \nTemp Max      : \Z3$TEMPMAX\Zn°C
+	        \nFan           : \Z2$FAN \ZnRPM
+	        \nFan Min       : \Z4$FANMIN \ZnRPM
+	        \nFan Max       : \Z3$FANMAX \ZnRPM
+	        \nPower         : \Z2$POWER \ZnW
+	        \nPower Min     : \Z4$POWERMIN \ZnW
+	        \nPower Max     : \Z3$POWERMAX \ZnW\n
+	        \n(\Z1Ctrl+c\Zn para Sair)" 0 0
+	        setterm -cursor off
+	        sleep "$TIME"
+	done
+}
+
+##
 ##	Main
 ##
-while :; do
-	basevars
-	check_max_min
-	logrmonitor
-	dialog --colors --title "\Zb\Z1 $VGA " \
-	--infobox "\n\ZB\ZnGPU Clock     : \Z2$GPUCLOCK \ZnMHz
-	\nGPU Clock Min : \Z4$GPUCLOCKMIN \ZnMHz
-        \nGPU Clock Max : \Z3$GPUCLOCKMAX \ZnMHz
-	\nMem Clock     : \Z2$MEMCLOCK \ZnMHz
-	\nMem Clock Min : \Z4$MEMCLOCKMIN \ZnMHz
-        \nMem Clock Max : \Z3$MEMCLOCKMAX \ZnMHz
-	\nMem Use       : \Z2$MEMUSE/$MEMTOTAL \ZnMB
-	\nMem Use Min   : \Z4$MEMUSEMIN/$MEMTOTAL \ZnMB
-        \nMem Use Max   : \Z3$MEMUSEMAX/$MEMTOTAL \ZnMB
-	\nTemp          : \Z2$TEMP\Zn°C
-	\nTemp Min      : \Z4$TEMPMIN\Zn°C
-        \nTemp Max      : \Z3$TEMPMAX\Zn°C
-	\nFan           : \Z2$FAN \ZnRPM
-	\nFan Min       : \Z4$FANMIN \ZnRPM
-        \nFan Max       : \Z3$FANMAX \ZnRPM
-	\nPower         : \Z2$POWER \ZnW
-	\nPower Min     : \Z4$POWERMIN \ZnW
-        \nPower Max     : \Z3$POWERMAX \ZnW\n
-        \n(\Z1Ctrl+c\Zn para Sair)" 0 0
-	setterm -cursor off
-	sleep "$TIME"
+while getopts "ht:" OPTION
+do
+	case $OPTION in
+		h)
+			help_function
+			;;
+		t)
+			TIME=$OPTARG
+			dialog_rmonitor
+			;;
+		*)
+			dialog_rmonitor
+			;;
+	esac
 done
+
+if [[ -t $TIMEARG ]]
+then 
+	dialog_rmonitor
+else
+	dialog_rmonitor
+fi
